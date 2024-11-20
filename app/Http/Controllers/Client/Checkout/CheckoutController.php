@@ -3,365 +3,117 @@
 namespace App\Http\Controllers\Client\Checkout;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Checkout\CreateCheckoutRequest;
+use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Dish;
 use App\Models\Order;
 use App\Models\Payment;
-use App\Models\Reservation;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
-use App\Mail\PaymentSuccessMail;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\PaymentSuccessMail;
 
 class CheckoutController extends Controller
 {
-    public function index()
+    public function checkout()
     {
         $userId = auth()->id();
-        $lastReservationId = session('last_reservation_id', null);
 
-        // Get reservations and last reservation without loading 'table' data
-        $reservations = Reservation::where('user_id', $userId)->get();
-        $lastReservation = $reservations->firstWhere('id', $lastReservationId);
+        // Lấy giỏ hàng của người dùng
+        $cartItems = Cart::where('user_id', $userId)->with(['dish', 'promotion'])->get();
 
-        session()->put('lastReservation', $lastReservation);
+        // Tính tổng tiền và khuyến mãi
+        $totalPrice = $cartItems->sum('total_price');
+        $discount = session('discount_value', 0); // Lấy giá trị khuyến mãi từ session
+        $totalPriceAfterDiscount = max(0, $totalPrice - $discount);
 
-        // Get carts and calculate totals
-        $carts = Cart::where('user_id', $userId)->with(['dish', 'promotion'])->get();
-        $totalPrices = Cart::getTotalPrice($userId);
-
-        return view('clients.checkout.index', [
-            'lastReservation' => $lastReservation,
-            'carts' => $carts,
-            'totalPrice' => $totalPrices['totalPrice'],
-            'totalPriceAfterDiscount' => $totalPrices['totalPriceAfterDiscount']
-        ]);
-    }
-
-
-    public function checkout(CreateCheckoutRequest $request)
-    {
-        $users = auth()->user();
-
-        $reservationData = [
-            'user_id' => $users->id,
-            'name' => $request->name,
-            'phone' => $request->phone,
-            'seats' => $request->seats,
-            'reservation_date' => $request->reservation_date,
-            'reservation_time' => $request->reservation_time,
-            'note' => $request->note,
-        ];
-
-        $reservation = Reservation::createReservation($reservationData);
-
-        session(['last_reservation_id' => $reservation->id]);
-
-        return redirect()->route('checkout');
+        return view('clients.checkout.checkout', compact('cartItems', 'totalPrice', 'discount', 'totalPriceAfterDiscount'));
     }
 
     public function processPayment(Request $request)
     {
-        $user_id = auth()->id();
-        $user = \App\Models\User::find($user_id);
-        // Xác định phương thức thanh toán mà người dùng chọn
-        $paymentMethod = $request->input('paymentMethod');
+        // Validate thông tin người dùng
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|numeric|digits_between:10,11',
+            'note' => 'nullable|string|max:1000',
+            'paymentMethod' => 'required|in:restaurant,vnpay,momo', // Các phương thức thanh toán hợp lệ
+            'payment_option' => 'required|in:store,delivery', // Dùng tại cửa hàng hoặc giao hàng
+            'delivery_address' => 'nullable|string|max:255|required_if:payment_option,delivery', // Địa chỉ cần thiết nếu giao hàng
+        ]);
 
-        // Lấy danh sách sản phẩm trong giỏ hàng của người dùng hiện tại
-        $cartItems = Cart::where('user_id', $user_id)->get();
-        // Tính toán tổng tiền
-        $totalPrice = $cartItems->sum('total_price');
-        // Nếu có khuyến mãi, áp dụng mã giảm giá
-        $promotion = $cartItems->first()->promotion ?? null;;
+        $userId = auth()->id();
+        $user = auth()->user();
 
-        if ($promotion) {
-            // Trừ số lần sử dụng của mã giảm giá
-            if ($promotion->number_use > 0) {
-                $totalPrice -= $promotion->discount;
-
-                // Cập nhật số lần sử dụng của mã giảm giá
-                $promotion->number_use -= 1;
-                $promotion->save();
-            }
+        // Lấy giỏ hàng của người dùng
+        $cartItems = Cart::where('user_id', $userId)->get();
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('cart')->with('error', 'Giỏ hàng của bạn đang trống.');
         }
 
-        // Lấy thông tin lastReservation từ session
-        $lastReservation = session()->get('lastReservation');
+        // Tính tổng tiền và khuyến mãi
+        $totalPrice = $cartItems->sum('total_price');
+        $discount = session('discount_value', 0);
+        $totalPriceAfterDiscount = max(0, $totalPrice - $discount);
+
         $orderCode = 'DH-' . strtoupper(str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT));
 
-        switch ($paymentMethod) {
-            case 'restaurant':
-                // Tạo đơn hàng mới
-                $order = Order::create([
-                    'user_id' => $user_id,
-                    'name' => $lastReservation ? $lastReservation->name : auth()->user()->name,
-                    'note' => $lastReservation ? $lastReservation->note : null,
-                    'code_order' => $orderCode,
-                    'status' => 'đang sử lý',
-                    'order_date' => $lastReservation ? $lastReservation->reservation_date : null,
-                    'order_time' => $lastReservation ? $lastReservation->reservation_time : null,
-                ]);
+        // Tạo đơn hàng mới
+        $order = Order::create([
+            'user_id' => $userId,
+            'name' => $request->name,
+            'phone' => $request->phone,
+            'note' => $request->note,
+            'code_order' => $orderCode,
+            'status' => 'Đang xử lý',
+            'payment_option' => $request->payment_option,
+            'delivery_address' => $request->payment_option === 'delivery' ? $request->delivery_address : null,
+            'total_amount' => $totalPriceAfterDiscount,
+        ]);
 
-                foreach ($cartItems as $cartItem) {
-                    $order->dishes()->attach($cartItem->dish_id, ['quantity' => $cartItem->quantity]);
-                    $dish = Dish::find($cartItem->dish_id);
-                    if ($dish) {
-                        $dish->quantity -= $cartItem->quantity;
-                        $dish->save();
-                    }
-                }
+        foreach ($cartItems as $cartItem) {
+            // Gắn món ăn vào đơn hàng
+            $order->dishes()->attach($cartItem->dish_id, ['quantity' => $cartItem->quantity]);
 
-                // Tạo bản ghi thanh toán
-                $payment = Payment::create([
-                    'order_id' => $order->id,
-                    'user_id' => $user_id,
-                    'payment_date' => $lastReservation ? $lastReservation->reservation_date : now(),
-                    'payment_method' => $paymentMethod,
-                    'total_amount' => $totalPrice,
-                ]);
+            // Trừ số lượng món ăn
+            $dish = Dish::with('ingredients')->find($cartItem->dish_id);
+            if ($dish) {
+                $dish->decrement('quantity', $cartItem->quantity);
 
-                // Xóa giỏ hàng sau khi thanh toán thành công
-                Cart::where('user_id', $user_id)->delete();
-                // Gửi email thông báo thanh toán thành công
-                Mail::to($user->email)->send(new PaymentSuccessMail($user, $order));
-                // Chuyển hướng người dùng tới trang thành công hoặc trang đơn hàng
-                flash()->success('Thanh toán thành công!');
-                return redirect()->route('home');
-                break;
-            case 'vnpay':
-                $vnp_TmnCode = "K352G5ON"; // Mã website tại VNPay
-                $vnp_HashSecret = "F1GCU0VW1JEOZZNDZ80D3C6MHW8N7M8Y"; // Chuỗi bí mật
-                $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"; // URL thanh toán của VNPay
-                $vnp_Returnurl = route('home'); // URL trả về khi thanh toán thành công
-                $vnp_TxnRef = $orderCode; // Mã đơn hàng
-                $vnp_OrderInfo = 'Thanh toán đơn hàng ' . $orderCode;
-                $vnp_Amount = $totalPrice * 100; // VNPay yêu cầu giá trị phải nhân 100
-                $vnp_Locale = 'vn'; // Ngôn ngữ
-                $vnp_BankCode = ''; // Mã ngân hàng
-                $vnp_IpAddr = request()->ip(); // Địa chỉ IP của người dùng
-                $vnp_CreateDate = now()->format('YmdHis'); // Đảm bảo định dạng đúng
+                // Cập nhật số lượng nguyên liệu cần thiết
+                foreach ($dish->ingredients as $ingredient) {
+                    $quantityNeeded = $ingredient->pivot->quantity * $cartItem->quantity;
 
-                // Tạo đơn hàng mới và lưu vào database
-                $order = Order::create([
-                    'user_id' => $user_id,
-                    'name' => $lastReservation ? $lastReservation->name : auth()->user()->name,
-                    'note' => $lastReservation ? $lastReservation->note : null,
-                    'code_order' => $orderCode,
-                    'status' => 'đã thanh toán',
-                    'order_date' => $lastReservation ? $lastReservation->reservation_date : null,
-                    'order_time' => $lastReservation ? $lastReservation->reservation_time : null,
-                ]);
-
-                foreach ($cartItems as $cartItem) {
-                    $order->dishes()->attach($cartItem->dish_id, ['quantity' => $cartItem->quantity]);
-                    $dish = Dish::find($cartItem->dish_id);
-                    if ($dish) {
-                        $dish->quantity -= $cartItem->quantity;
-                        $dish->save();
-                    }
-                }
-
-                // Tạo bản ghi thanh toán (chưa hoàn thành)
-                $payment = Payment::create([
-                    'order_id' => $order->id,
-                    'user_id' => $user_id,
-                    'payment_date' => now(),
-                    'payment_method' => $paymentMethod,
-                    'total_amount' => $totalPrice,
-                ]);
-
-                // Xóa giỏ hàng sau khi thanh toán thành công
-                Cart::where('user_id', $user_id)->delete();
-                Mail::to($user->email)->send(new PaymentSuccessMail($user, $order));
-                // Xây dựng URL thanh toán
-                $vnp_Params = [
-                    "vnp_Version" => "2.1.0",
-                    "vnp_Command" => "pay",
-                    "vnp_TmnCode" => $vnp_TmnCode,
-                    "vnp_Amount" => $vnp_Amount,
-                    "vnp_CurrCode" => "VND",
-                    "vnp_TxnRef" => $vnp_TxnRef,
-                    "vnp_OrderInfo" => $vnp_OrderInfo,
-                    "vnp_OrderType" => "billpayment",
-                    "vnp_Locale" => $vnp_Locale,
-                    "vnp_ReturnUrl" => $vnp_Returnurl,
-                    "vnp_IpAddr" => $vnp_IpAddr,
-                    "vnp_CreateDate" => now()->format('YmdHis'),
-                ];
-
-                ksort($vnp_Params);
-                $hashdata = http_build_query($vnp_Params, '', '&');
-                $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
-
-                $vnp_Url .= "?" . $hashdata . '&vnp_SecureHash=' . $vnpSecureHash;
-
-                flash()->success('Thanh toán thành công!');
-                return redirect($vnp_Url);
-                break;
-            case 'momo':
-                $partnerCode = env('MOMO_PARTNER_CODE');
-                $accessKey = env('MOMO_ACCESS_KEY');
-                $secretKey = env('MOMO_SECRET_KEY');
-                $endpoint = env('MOMO_ENDPOINT');
-
-                $orderId = $orderCode;
-                $orderInfo = 'Thanh toán đơn hàng';
-                $amount = $totalPrice * 100; // MoMo yêu cầu số tiền phải nhân 100
-                $returnUrl = route('momo.return'); // URL trả về sau khi thanh toán
-
-                $requestId = Str::uuid()->toString();
-                $requestData = [
-                    'partnerCode' => $partnerCode,
-                    'accessKey' => $accessKey,
-                    'requestId' => $requestId,
-                    'amount' => $amount,
-                    'orderId' => $orderId,
-                    'orderInfo' => $orderInfo,
-                    'returnUrl' => $returnUrl,
-                    'notifyUrl' => route('home'), // URL nhận thông báo từ MoMo
-                    'requestType' => 'captureMoMoWallet',
-                    'extraData' => ''
-                ];
-
-                // Tạo chữ ký
-                $signature = hash_hmac('sha256', json_encode($requestData), $secretKey);
-                $requestData['signature'] = $signature;
-
-                // Gửi yêu cầu thanh toán
-                $response = Http::post($endpoint, $requestData);
-                $order = Order::create([
-                    'user_id' => $user_id,
-                    'name' => $lastReservation ? $lastReservation->name : auth()->user()->name,
-                    'note' => $lastReservation ? $lastReservation->note : null,
-                    'code_order' => $orderCode,
-                    'status' => 'đang sử lý',
-                    'order_date' => $lastReservation ? $lastReservation->reservation_date : null,
-                    'order_time' => $lastReservation ? $lastReservation->reservation_time : null,
-                ]);
-
-                foreach ($cartItems as $cartItem) {
-                    $order->dishes()->attach($cartItem->dish_id, ['quantity' => $cartItem->quantity]);
-                    $dish = Dish::find($cartItem->dish_id);
-                    if ($dish) {
-                        $dish->quantity -= $cartItem->quantity;
-                        $dish->save();
-                    }
-                }
-
-                $payment = Payment::create([
-                    'order_id' => $order->id,
-                    'user_id' => $user_id,
-                    'payment_date' => $lastReservation ? $lastReservation->reservation_date : now(),
-                    'payment_method' => 'momo',
-                    'total_amount' => $totalPrice,
-                ]);
-
-                $responseData = $response->json();
-                if ($responseData['resultCode'] == '00') {
-                    // Chuyển hướng người dùng tới trang thanh toán của MoMo
-                    return redirect($responseData['payUrl']);
-                } else {
-                    flash()->error('Có lỗi xảy ra khi tạo yêu cầu thanh toán.');
-                    return redirect()->back();
-                }
-                break;
-            default:
-                flash()->error('Vui lòng chọn phương thức thanh toán.');
-                return redirect()->back();
-        }
-
-        // Xóa giỏ hàng sau khi thanh toán thành công
-        Cart::where('user_id', auth()->id())->delete();
-        Mail::to($user->email)->send(new PaymentSuccessMail($user, $order));
-        // Chuyển hướng người dùng tới trang thành công hoặc trang đơn hàng
-        flash()->success('Thanh toán thành công!');
-        return redirect()->route('home');
-    }
-
-    public function momoReturn(Request $request)
-    {
-        $responseCode = $request->input('responseCode');
-        $orderId = $request->input('orderId');
-        $amount = $request->input('amount');
-        $signature = $request->input('signature');
-
-        $secretKey = env('MOMO_SECRET_KEY');
-        $validSignature = hash_hmac('sha256', $orderId . $amount . $responseCode, $secretKey);
-
-        if ($signature === $validSignature) {
-            if ($responseCode == '00') {
-                // Cập nhật trạng thái đơn hàng và thanh toán
-                $order = Order::where('code_order', $orderId)->first();
-                if ($order) {
-                    $order->update([
-                        'status' => 'Đã thanh toán'
-                    ]);
-
-                    $payment = Payment::where('order_id', $order->id)->first();
-                    if ($payment) {
-                        $payment->update([
-                            'payment_status' => 'completed'
-                        ]);
+                    // Kiểm tra nếu số lượng nguyên liệu trong kho đủ
+                    if ($ingredient->quantity < $quantityNeeded) {
+                        return redirect()->route('cart')->with('error', "Không đủ nguyên liệu: {$ingredient->name} trong kho.");
                     }
 
-                    // Xóa giỏ hàng
-                    Cart::where('user_id', $order->user_id)->delete();
-
-                    flash()->success('Thanh toán thành công!');
-                    return redirect()->route('home');
+                    // Trừ số lượng nguyên liệu
+                    $ingredient->decrement('quantity', $quantityNeeded);
                 }
-            } else {
-                flash()->error('Thanh toán không thành công.');
-                return redirect()->route('home');
             }
-        } else {
-            flash()->error('Chữ ký không hợp lệ.');
-            return redirect()->route('home');
         }
-    }
 
-    public function vnpayReturn(Request $request)
-    {
-        $vnp_HashSecret = "F1GCU0VW1JEOZZNDZ80D3C6MHW8N7M8Y";
-        $inputData = $request->all();
+        // Tạo bản ghi thanh toán
+        Payment::create([
+            'order_id' => $order->id,
+            'user_id' => $userId,
+            'payment_date' => now(),
+            'payment_method' => $request->paymentMethod,
+            'total_amount' => $totalPriceAfterDiscount,
+        ]);
 
-        $vnp_SecureHash = $inputData['vnp_SecureHash'];
-        unset($inputData['vnp_SecureHash']);
-        ksort($inputData);
-        $hashData = http_build_query($inputData, '', '&');
+        // Xóa giỏ hàng
+        Cart::where('user_id', $userId)->delete();
 
-        $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
-
-        if ($secureHash === $vnp_SecureHash) {
-            // Xử lý trạng thái thanh toán
-            if ($inputData['vnp_ResponseCode'] == '00') {
-                // Cập nhật trạng thái thanh toán thành công
-                $order = Order::where('code_order', $inputData['vnp_TxnRef'])->first();
-                if ($order) {
-                    $order->status = 'đã thanh toán';
-                    $order->save();
-
-                    $payment = $order->payments()->where('payment_method', 'vnpay')->first();
-                    if ($payment) {
-                        $payment->payment_status = 'success';
-                        $payment->save();
-                    }
-
-                    // Xóa giỏ hàng sau khi thanh toán thành công
-                    Cart::where('user_id', $order->user_id)->delete();
-
-                    flash()->success('Thanh toán thành công!');
-                    return redirect()->route('home');
-                }
-            } else {
-                flash()->error('Thanh toán không thành công.');
-                return redirect()->route('home');
-            }
-        } else {
-            flash()->error('Sai chữ ký!');
-            return redirect()->route('home');
+        // Gửi email thông báo
+        try {
+            Mail::to($user->email)->send(new PaymentSuccessMail($user, $order));
+        } catch (\Exception $e) {
+            // Log lỗi nếu không gửi được email
+            \Log::error('Error sending payment email: ' . $e->getMessage());
         }
+
+        // Chuyển hướng người dùng đến trang chủ hoặc trang thành công
+        return redirect()->route('home')->with('success', 'Đơn hàng của bạn đã được đặt thành công!');
     }
 }

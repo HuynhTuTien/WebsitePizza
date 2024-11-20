@@ -18,7 +18,7 @@ class OrderController extends Controller
         $search = $request->input('search');
         // Nếu có giá trị tìm kiếm
         // Khởi tạo query builder với các mối quan hệ
-        $query = Order::with(['user', 'dishes', 'table', 'payments']);
+        $query = Order::with(['user', 'dishes', 'payments']);
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -40,14 +40,31 @@ class OrderController extends Controller
 
     public function show(string $id)
     {
-        $order = Order::with(['user', 'dishes', 'table', 'payments', 'promotion'])->findOrFail($id);
+        $order = Order::with(['user', 'dishes', 'payments', 'promotion'])->findOrFail($id);
 
         return view('admin.order.detail.detail', compact('order'));
     }
 
+
+    // Cập nhật trạng thái đơn hàng
+    public function updateStatus(Request $request, $id)
+    {
+        // Validate trạng thái
+        $request->validate([
+            'status' => 'required|in:đang xử lý,đang vận chuyển,hoàn thành',
+        ]);
+
+        $order = Order::findOrFail($id);
+        $order->status = $request->status;
+        $order->save();
+
+        return redirect()->route('admin.order.show', ['id' => $id])
+            ->with('success', 'Trạng thái đơn hàng đã được cập nhật!');
+    }
+
     public function generatePdf($id)
     {
-        $order = Order::with(['user', 'dishes', 'table', 'payments', 'promotion'])->findOrFail($id);
+        $order = Order::with(['user', 'dishes', 'payments', 'promotion'])->findOrFail($id);
 
         // Tính toán tổng số tiền
         $totalAmount = $order->dishes->sum(function ($dish) {

@@ -16,9 +16,9 @@
                             <div class="card-body pt-0">
                                 <form action="{{ route('promotion.store') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
-                                    
+
                                     <!-- Kiểm tra lỗi toàn bộ form -->
-                                    
+
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="mb-3">

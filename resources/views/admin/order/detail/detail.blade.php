@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'detail order')
+@section('title', 'Chi tiết đơn hàng')
 @section('content')
     <div class="content-body">
         <div class="container">
@@ -9,24 +9,29 @@
                         <div class="col-xl-12 col-md-6">
                             <div class="card">
                                 <div class="card-header border-0 pb-0">
-                                    <h4 class="h-title">Mặt hàng</h4>
-                                    <div class="dropdown custom-dropdown mb-0">
-                                        <div class="btn sharp tp-btn dark-btn" data-bs-toggle="dropdown">
-                                            <svg width="5" height="18" viewBox="0 0 5 18" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <circle cx="2.25748" cy="2.19083" r="1.92398" fill="#1921FA" />
-                                                <circle cx="2.25748" cy="8.92471" r="1.92398" fill="#1921FA" />
-                                                <circle cx="2.25748" cy="15.6585" r="1.92398" fill="#1921FA" />
-                                            </svg>
-
-                                        </div>
-                                        <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item"
-                                                href="{{ route('order.pdf', ['id' => $order->id]) }}">In hóa đơn</a>
-                                        </div>
-                                    </div>
+                                    <h4 class="h-title">Thông tin đơn hàng</h4>
                                 </div>
                                 <div class="card-body pt-2">
+                                    <!-- Hiển thị thông tin khách hàng -->
+                                    <div class="mb-3">
+                                        <strong>Tên khách hàng:</strong> {{ $order->name }}
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Số điện thoại:</strong> {{ $order->phone }}
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Địa chỉ giao hàng:</strong> {{ $order->delivery_address ?? 'Không có' }}
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Ghi chú:</strong> {{ $order->note ?? 'Không có ghi chú' }}
+                                    </div>
+
+                                    <!-- Hiển thị trạng thái đơn hàng -->
+                                    <div class="mb-3">
+                                        <strong>Trạng thái:</strong> {{ $order->status }}
+                                    </div>
+
+                                    <!-- Mặt hàng trong đơn hàng -->
                                     @foreach ($order->dishes as $dish)
                                         <div class="food-items-bx">
                                             <div class="food-items-media">
@@ -48,36 +53,44 @@
                                         </div>
                                     @endforeach
                                     <hr>
+
+                                    <!-- Cập nhật trạng thái đơn hàng -->
+                                    <form action="{{ route('admin.order.updateStatus', $order->id) }}" method="POST">
+                                        @csrf
+                                        <label for="status">Trạng thái đơn hàng:</label>
+                                        <select name="status" id="status" class="form-control">
+                                            <option value="đang xử lý" {{ $order->status == 'đang xử lý' ? 'selected' : '' }}>Đang xử lý</option>
+                                            <option value="đang vận chuyển" {{ $order->status == 'đang vận chuyển' ? 'selected' : '' }}>Đang vận chuyển</option>
+                                            <option value="hoàn thành" {{ $order->status == 'hoàn thành' ? 'selected' : '' }}>Hoàn thành</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-primary mt-3">Cập nhật trạng thái</button>
+                                    </form>
+
+                                    <!-- Thông tin thanh toán -->
                                     <div class="food-totle">
                                         <ul class="d-flex align-items-center justify-content-between">
-                                            <li><span>
-                                                    Số bàn</span></li>
-                                            <li>
-                                                <h6>{{ $order->table->number }}</h6>
-                                        </ul>
-                                        <ul class="d-flex align-items-center justify-content-between">
-                                            <li><span>
-                                                    Ngày và giờ thanh toán</span></li>
+                                            <li><span>Ngày và giờ thanh toán</span></li>
                                             <li>
                                                 <h6>{{ $order->order_date }} ({{ $order->order_time }})</h6>
+                                            </li>
                                         </ul>
                                         <ul class="d-flex align-items-center justify-content-between">
-                                            <li><span>
-                                                    Khuyễn mãi</span></li>
+                                            <li><span>Khuyến mãi</span></li>
                                             <li>
-                                                <h6>-{{ number_format($order->promotion->discount ?? 0, 0, ',', '.') }}đ
-                                                </h6>
+                                                <h6>-{{ number_format($order->promotion->discount ?? 0, 0, ',', '.') }}đ</h6>
+                                            </li>
                                         </ul>
+
                                         @php
                                             $totalAmount = $order->dishes->sum(function ($dish) {
                                                 return $dish->price * $dish->pivot->quantity;
                                             });
                                         @endphp
                                         <ul class="d-flex align-items-center justify-content-between">
-                                            <li><span>
-                                                    Tổng cộng</span></li>
+                                            <li><span>Tổng cộng</span></li>
                                             <li>
                                                 <h6>{{ number_format($totalAmount, 0, ',', '.') }}đ</h6>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
@@ -89,5 +102,8 @@
             </div>
 
         </div>
+        <a href="{{ route('order.list') }}" class="btn btn-secondary mt-3">Quay lại</a>
+
     </div>
 @endsection
+s

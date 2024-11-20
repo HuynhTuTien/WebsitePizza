@@ -1,5 +1,6 @@
 @extends('layouts.clients')
 @section('title', 'Đăng nhập')
+
 @section('content')
     <div class="banner-area breadcrumb-area padding-top-120 padding-bottom-90">
         <div class="bread-shapes">
@@ -73,13 +74,7 @@
                     <div class="contact-form-area login-form-area signup-form-area">
                         <h3>đăng nhập <span>Tài khoản của bạn</span></h3>
                         <x-guest-layout>
-                            {{-- @if ($errors->any())
-                                <script>
-                                    @foreach ($errors->all() as $error)
-                                        toastr.error("{{ $error }}");
-                                    @endforeach
-                                </script>
-                            @endif --}}
+
                             @if ($errors->any())
                                 <div class="alert alert-danger">
                                     <ul>
@@ -97,12 +92,7 @@
                                         <a href="{{ route('auth.google') }}" class="btn google-btn"><span><i
                                                     class="fab fa-google"></i></span> Google</a>
                                     </div>
-                                    {{-- <div class="col">
-                                        <a href="{{ route('login.facebook') }}" style="background-color: blue;"
-                                            class="btn d-flex align-items-center justify-content-center">
-                                            <i class="fab fa-facebook-f me-2"></i> Facebook
-                                        </a>
-                                    </div> --}}
+
                                 </div>
 
                                 <div class="mt-4">

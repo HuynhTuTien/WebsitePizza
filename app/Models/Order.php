@@ -20,7 +20,9 @@ class Order extends Model
         'code_order',
         'status',
         'order_date',
-        'order_time'
+        'order_time',
+        'delivery_address', // Cột mới
+        'payment_option',   // Cột mới
     ];
 
     public function user(): BelongsTo
@@ -58,12 +60,13 @@ class Order extends Model
         return $total;
     }
 
-    public function reservation(): BelongsTo
-    {
-        return $this->belongsTo(Reservation::class);
-    }
+
 
     public function order_dish()
+    {
+        return $this->hasMany(OrderDish::class);
+    }
+    public function orderDishes()
     {
         return $this->hasMany(OrderDish::class);
     }

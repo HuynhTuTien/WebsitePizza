@@ -15,7 +15,6 @@
         <h2 class="text-center">Code order #{{ $order->code_order }}</h2>
         <p><strong>Name:</strong> {{ $order->name }}</p>
         <p><strong>Date:</strong> {{ $order->order_date }}</p>
-        <p><strong>Table:</strong> {{ $order->table->number }}</p>
 
         <table class="table table-striped table-bordered">
             <thead>

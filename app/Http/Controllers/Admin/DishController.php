@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Dish\CreateDishRequest;
 use App\Http\Requests\Dish\UpdateDishRequest;
 use App\Models\Category;
+use App\Models\Ingredient;
 use App\Models\Dish;
 use Illuminate\Http\Request;
 
@@ -78,5 +79,72 @@ class DishController extends Controller
         $dish->delete();
         flash()->success('Xóa thành công.');
         return redirect()->route('dish.list');
+    }
+
+
+    public function showIngredients($slug)
+    {
+        $dish = Dish::where('slug', $slug)->with('ingredients')->firstOrFail();
+        $ingredients = Ingredient::all(); // Để dùng khi thêm nguyên liệu
+        return view('admin.dish.ingredients', compact('dish', 'ingredients'));
+    }
+
+    //QUẢN LÝ NGUYÊN LIỆU CỦA MÓN ĂN
+    // Hàm hiển thị danh sách nguyên liệu của món ăn
+    public function manageIngredients($slug)
+    {
+        // Find the dish by its slug
+        $dish = Dish::where('slug', $slug)->with('ingredients')->firstOrFail();
+
+        // Get IDs of ingredients already associated with this dish
+        $existingIngredientIds = $dish->ingredients->pluck('id')->toArray();
+
+        // Get ingredients that are NOT in the existing ingredients list
+        $remainingIngredients = Ingredient::whereNotIn('id', $existingIngredientIds)->get();
+
+        return view('admin.dish.ingredients', [
+            'dish' => $dish,
+            'ingredients' => $remainingIngredients,
+        ]);
+    }
+
+
+    // Hàm thêm nguyên liệu vào món ăn
+    public function storeIngredient(Request $request, $slug)
+    {
+        $request->validate([
+            'ingredient_id' => 'required|exists:ingredients,id',
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $dish = Dish::where('slug', $slug)->firstOrFail();
+        $dish->addIngredient($request->ingredient_id, $request->quantity);
+
+        flash()->success('Thêm nguyên liệu thành công.');
+        return redirect()->route('dish.ingredients', $slug);
+    }
+
+    // Hàm cập nhật số lượng nguyên liệu của món ăn
+    public function updateIngredientQuantity(Request $request, $slug, $ingredientId)
+    {
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $dish = Dish::where('slug', $slug)->firstOrFail();
+        $dish->updateIngredient($ingredientId, $request->quantity);
+
+        flash()->success('Cập nhật nguyên liệu thành công.');
+        return redirect()->route('dish.ingredients', $slug);
+    }
+
+    // Hàm xóa nguyên liệu khỏi món ăn
+    public function deleteIngredient($slug, $ingredientId)
+    {
+        $dish = Dish::where('slug', $slug)->firstOrFail();
+        $dish->removeIngredient($ingredientId);
+
+        flash()->success('Xóa nguyên liệu thành công.');
+        return redirect()->route('dish.ingredients', $slug);
     }
 }

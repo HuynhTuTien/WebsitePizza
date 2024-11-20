@@ -4,14 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 
 class Promotion extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'code', 'discount', 'number_use', 'describe', 'status', 'start_time', 'end_time'
+        'code',
+        'discount',
+        'number_use',
+        'describe',
+        'status',
+        'start_time',
+        'end_time'
     ];
     protected $dates = ['start_time', 'end_time'];
 

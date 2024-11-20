@@ -5,12 +5,12 @@
 <!-- breadcrumb-area -->
 <div class="banner-area breadcrumb-area padding-top-120 padding-bottom-90">
     <div class="bread-shapes">
-        <span class="b-shape-1 item-bounce"><img src="assets/images/img/5.png" alt=""></span>
-        <span class="b-shape-2"><img src="assets/images/img/6.png" alt=""></span>
-        <span class="b-shape-3"><img src="assets/images/img/7.png" alt=""></span>
-        <span class="b-shape-4"><img src="assets/images/img/9.png" alt=""></span>
-        <span class="b-shape-5"><img src="assets/images/shapes/18.png" alt=""></span>
-        <span class="b-shape-6 item-animateOne"><img src="assets/images/img/7.png" alt=""></span>
+        <span class="b-shape-1 item-bounce"><img src="{{ asset('assets/client/images/img/5.png') }}" alt=""></span>
+        <span class="b-shape-2"><img src="{{ asset('assets/client/images/img/6.png') }}" alt=""></span>
+        <span class="b-shape-3"><img src="{{ asset('assets/client/images/img/7.png') }}" alt=""></span>
+        <span class="b-shape-4"><img src="{{ asset('assets/client/images/img/9.png') }}" alt=""></span>
+        <span class="b-shape-5"><img src="{{ asset('assets/client/images/shapes/18.png') }}" alt=""></span>
+        <span class="b-shape-6 item-animateOne"><img src="{{ asset('assets/client/images/img/7.png') }}" alt=""></span>
     </div>
     <div class="container padding-top-120">
         <div class="row justify-content-center">
@@ -24,6 +24,7 @@
         </div>
     </div>
 </div>
+
 <section class="profile-area padding-top-120 padding-bottom-120">
     <div class="container">
         <div class="row align-items-start">
@@ -106,14 +107,17 @@
                                             <span>{{ number_format($totalAmount, 0, ',', '.') }} vnđ</span>
                                         </td>
                                         <td>
-                                            <form action="{{ route('account.orders.cancel', $order->id) }}"
-                                                method="POST">
+                                            <!-- Ẩn nút Hủy nếu trạng thái là Đang vận chuyển hoặc Hoàn thành -->
+                                            @if ($order->status != 'đang vận chuyển' && $order->status != 'hoàn thành')
+                                            <form action="{{ route('account.orders.cancel', $order->id) }}" method="POST">
                                                 @csrf
                                                 <button type="submit" id="cancel-order-btn" class="btn-custom">Hủy đơn
                                                     hàng</button>
                                             </form>
+                                            @else
+                                            <span class="text-muted">Không thể hủy</span>
+                                            @endif
                                         </td>
-
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -143,7 +147,6 @@
                             </div>
                             {{ $promotions->links() }}
                         </div>
-
                     </div>
                     <!-- address-tab -->
                     <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab" tabindex="0">
@@ -153,9 +156,8 @@
                                     <h5 class="tab-title">Địa chỉ cửa hàng</h5>
                                     <ul>
                                         <li>Việt Nam</li>
-                                        <li>Ninh Kiều Cần Thơ</li>
-                                        <li>Hoàng Quốc Việt</li>
-                                        <li>123</li>
+                                        <li>140 Đ. Lê Trọng TấnTây Thạnh, Tân Phú, Hồ Chí Minh</li>
+
                                     </ul>
                                 </div>
                                 <div class="col-lg-6">
@@ -167,7 +169,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                     <!-- account-details -->
                     <div class="tab-pane fade" id="account-details" role="tabpanel"
@@ -240,6 +241,7 @@
     </div>
 </section>
 @endsection
+
 <style>
     .btn-custom {
         background-color: #dc3545;

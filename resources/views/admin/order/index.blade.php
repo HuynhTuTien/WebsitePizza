@@ -65,7 +65,7 @@
                                                     <th>Mã đơn hàng</th>
                                                     <th>Khách hàng</th>
                                                     <th>Món ăn</th>
-                                                    <th>Số bàn</th>
+
                                                     <th>Tổng tiền</th>
                                                     <th>Trạng thái</th>
                                                     <th>Hành động</th>
@@ -90,7 +90,7 @@
                                                                 </div>
                                                             @endforeach
                                                         </td>
-                                                        <td><span>{{ $order->table->number }}</span></td>
+
                                                         <td>
                                                             @php
                                                                 $totalAmount = $order->payments->sum('total_amount');

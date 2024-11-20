@@ -39,33 +39,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
-
-
-// Route::middleware([
-//     'auth:sanctum',
-//     config('jetstream.auth_session'),
-//     'verified',
-// ])->group(function () {
-//     Route::get('/dashboard', function () {
-//         return view('dashboard');
-//     })->middleware(['auth', 'verified'])->name('dashboard');
-// });
-
-// // Email Verification Routes
-// Route::get('email/verify', function () {
-//     return view('auth.verify-email');
-// })->middleware('auth')->name('verification.notice');
-
-// Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-//     $request->fulfill();
-//     return redirect('/dashboard');
-// })->middleware(['auth', 'signed'])->name('verification.verify');
-
-// Route::post('/email/verification-notification', function (Request $request) {
-//     $request->user()->sendEmailVerificationNotification();
-//     return back()->with('message', 'Verification link sent!');
-// })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+use App\Http\Controllers\Admin\Supplier\SupplierController;
+use App\Http\Controllers\Admin\Ingredient\IngredientController;
+use App\Http\Controllers\Admin\Auth\AdminLoginController;
 
 Route::get('/promotions/export', function () {
     return Excel::download(new PromotionsExport, 'promotions.xlsx');
@@ -86,19 +62,18 @@ Route::get('404', [ErrorController::class, 'index']);
 Route::get('tai-khoan', [AccountController::class, 'index'])->name('account');
 Route::get('lien-he', [ContactController::class, 'index'])->name('contact');
 
-// Route::get('tai-khoan', [AccountController::class, 'index'])->name('account')->middleware('auth');
-// Route::get('chi-tiet-tai-khoan/{id}', [AccountController::class, 'show'])->name('account.show')->middleware('auth');
 Route::get('thanh-toan', [CheckoutController::class, 'index'])->name('checkout');
 Route::get('gio-hang', [CartController::class, 'index'])->name('cart')->middleware('auth');
 Route::post('them-gio-hang', [CartController::class, 'addToCart'])->name('cartAdd')->middleware('auth');
-Route::delete('gio-hang/{id}', [CartController::class, 'remove'])->name('cartRemove')->middleware('auth');
+
+Route::delete('/gio-hang/{itemId}', [CartController::class, 'removeFromCart'])->name('cart.remove')->middleware('auth');
+
 Route::delete('cart/clear', [CartController::class, 'clear'])->name('cart.clear')->middleware('auth');
 Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update')->middleware('auth');
 Route::post('nhap-ma-uu-dai', [CartController::class, 'applyDiscountCode'])->name('applyDiscountCode')->middleware('auth');
 Route::get('thanh-toan', [CheckoutController::class, 'index'])->name('checkout');
 Route::post('thanh-toan', [CheckoutController::class, 'checkout'])->name('checkout.store');
 Route::post('thanh-toan/tien-hanh', [CheckoutController::class, 'processPayment'])->name('payment.process');
-// Route::post('momo/return', [CheckoutController::class, 'momoReturn'])->name('momo.return');
 Route::get('/vnpay/return', [PaymentController::class, 'vnpayReturn'])->name('vnpay.return');
 Route::post('/check-table-availability', [CartController::class, 'checkTableAvailability'])->name('check.table.availability');
 
@@ -125,10 +100,6 @@ Route::get('admin/login', [AuthUserController::class, 'login'])->name('admin.log
 Route::get('auth/google', [LoginController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('auth/google/callback', [LoginController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
-// Route::get('login/facebook', [LoginController::class, 'redirectToFacebook'])->name('login.facebook');
-// Route::get('login/facebook/callback', [LoginController::class, 'handleFacebookCallback']);
-
-
 Route::name('dish.')->group(function () {
     Route::get('dish', [AdminDishController::class, 'list'])->name('list')->middleware(['auth', 'role:admin,staff']);
     Route::get('dish/add', [AdminDishController::class, 'add'])->name('add')->middleware(['auth', 'role:admin,staff']);
@@ -136,11 +107,17 @@ Route::name('dish.')->group(function () {
     Route::get('dish/edit/{slug}', [AdminDishController::class, 'edit'])->name('edit')->middleware(['auth', 'role:admin,staff']);
     Route::put('dish/update/{slug}', [AdminDishController::class, 'update'])->name('update')->middleware(['auth', 'role:admin,staff']);
     Route::delete('dish/delete/{slug}', [AdminDishController::class, 'delete'])->name('delete')->middleware(['auth', 'role:admin,staff']);
+
+
+    Route::get('dish/ingredients/{slug}', [AdminDishController::class, 'manageIngredients'])->name('ingredients')->middleware(['auth', 'role:admin,staff']);
+
+    Route::post('dish/ingredients/{slug}/add', [AdminDishController::class, 'storeIngredient'])->name('addIngredient')->middleware(['auth', 'role:admin,staff']);
+    Route::post('dish/ingredients/{slug}/{ingredientId}/update', [AdminDishController::class, 'updateIngredientQuantity'])->name('updateIngredientQuantity')->middleware(['auth', 'role:admin,staff']);
+    Route::delete('dish/ingredients/{slug}/{ingredientId}', [AdminDishController::class, 'deleteIngredient'])->name('deleteIngredient')->middleware(['auth', 'role:admin,staff']);
 })->middleware(['auth', 'role:admin,staff']);
 
 
 Route::post('payment/store', [PaymentController::class, 'store'])->name('payment.store');
-
 
 
 // Order
@@ -149,7 +126,6 @@ Route::get('/orders/{id}', [OrderController::class, 'show'])->name('order.detail
 Route::get('/orders/{id}/pdf', [OrderController::class, 'generatePdf'])->name('order.pdf')->middleware(['auth', 'role:admin,staff']);
 
 Route::get('payment', [PaymentController::class, 'index'])->name('payment.list')->middleware(['auth', 'role:admin,staff']);
-
 
 
 //user
@@ -164,15 +140,15 @@ Route::name('user.')->group(function () {
 
 
 
-// post
-Route::name('post.')->group(function () {
-    Route::get('post/list', [PostController::class, 'index'])->name('list')->middleware(['auth', 'role:admin,staff']);
-    Route::get('post/create', [PostController::class, 'create'])->name('create')->middleware(['auth', 'role:admin,staff']);
-    Route::post('post/store', [PostController::class, 'store'])->name('store')->middleware(['auth', 'role:admin,staff']);
-    Route::get('post/edit/{id}', [PostController::class, 'edit'])->name('edit')->middleware(['auth', 'role:admin,staff']);
-    Route::put('post/update/{id}', [PostController::class, 'update'])->name('update')->middleware(['auth', 'role:admin,staff']);
-    Route::delete('post/delete/{id}', [PostController::class, 'destroy'])->name('destroy')->middleware(['auth', 'role:admin,staff']);
-})->middleware(['auth', 'role:admin,staff']);
+// // post
+// Route::name('post.')->group(function () {
+//     Route::get('post/list', [PostController::class, 'index'])->name('list')->middleware(['auth', 'role:admin,staff']);
+//     Route::get('post/create', [PostController::class, 'create'])->name('create')->middleware(['auth', 'role:admin,staff']);
+//     Route::post('post/store', [PostController::class, 'store'])->name('store')->middleware(['auth', 'role:admin,staff']);
+//     Route::get('post/edit/{id}', [PostController::class, 'edit'])->name('edit')->middleware(['auth', 'role:admin,staff']);
+//     Route::put('post/update/{id}', [PostController::class, 'update'])->name('update')->middleware(['auth', 'role:admin,staff']);
+//     Route::delete('post/delete/{id}', [PostController::class, 'destroy'])->name('destroy')->middleware(['auth', 'role:admin,staff']);
+// })->middleware(['auth', 'role:admin,staff']);
 
 
 
@@ -185,8 +161,6 @@ Route::name('category.')->group(function () {
     Route::post('/categories/update/{id}', [CategoryController::class, 'processUpdate'])->name('processUpdate')->middleware(['auth', 'role:admin,staff']);
     Route::delete('category/{id}', [CategoryController::class, 'delete'])->name('delete')->middleware(['auth', 'role:admin,staff']);
 })->middleware(['auth', 'role:admin,staff']);
-
-
 
 
 //Promotion
@@ -202,3 +176,53 @@ Route::name('promotion.')->group(function () {
 
 //comment
 Route::get('comment', [CommentController::class, 'index'])->name('comment.list')->middleware(['auth', 'role:admin']);
+
+
+Route::name('supplier.')->prefix('supplier')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/', [SupplierController::class, 'index'])->name('list'); // Hiển thị danh sách nhà cung cấp
+    Route::get('/create', [SupplierController::class, 'create'])->name('create'); // Hiển thị form tạo nhà cung cấp mới
+    Route::post('/', [SupplierController::class, 'store'])->name('store'); // Lưu nhà cung cấp mới
+    Route::get('/{supplier}', [SupplierController::class, 'show'])->name('show'); // Hiển thị chi tiết một nhà cung cấp
+    Route::get('/{supplier}/edit', [SupplierController::class, 'edit'])->name('edit'); // Hiển thị form chỉnh sửa nhà cung cấp
+    Route::put('/{supplier}', [SupplierController::class, 'update'])->name('update'); // Cập nhật thông tin nhà cung cấp
+    Route::delete('/delete/{id}', action: [SupplierController::class, 'destroy'])->name('destroy'); // Xóa nhà cung cấp
+});
+
+
+Route::name('ingredient.')->prefix('ingredient')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/', [IngredientController::class, 'index'])->name('list'); // Danh sách nguyên liệu
+    Route::get('/create', [IngredientController::class, 'create'])->name('create'); // Hiển thị form tạo nguyên liệu mới
+    Route::post('/store', [IngredientController::class, 'store'])->name('store'); // Lưu nguyên liệu mới
+    Route::get('/{ingredient}/edit', [IngredientController::class, 'edit'])->name('edit'); // Hiển thị form chỉnh sửa nguyên liệu
+    Route::put('/{ingredient}', [IngredientController::class, 'update'])->name('update'); // Cập nhật thông tin nguyên liệu
+    Route::delete('/delete/{id}', [IngredientController::class, 'destroy'])->name('destroy'); // Xóa nguyên liệu
+
+
+    // Route cho việc nhập nguyên liệu từ nhà cung cấp
+    Route::get('/entry', [IngredientController::class, 'showEntryForm'])->name('entryForm'); // Hiển thị form nhập nguyên liệu
+    Route::post('/entry', [IngredientController::class, 'storeEntry'])->name('storeEntry'); // Lưu nhập nguyên liệu
+
+    Route::get('/entry/list', [IngredientController::class, 'showEntryList'])->name('entry.list'); // Danh sách lịch sử nhập nguyên liệu
+
+});
+
+
+Route::get('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
+Route::post('/checkout', [CheckoutController::class, 'processPayment'])->name('payment.process');
+
+
+// Route hiển thị chi tiết đơn hàng
+Route::get('/admin/order/{id}', [OrderController::class, 'show'])->name('admin.order.show');
+
+// Route cập nhật trạng thái đơn hàng
+Route::post('/admin/order/{id}/update-status', [OrderController::class, 'updateStatus'])->name('admin.order.updateStatus');
+
+
+Route::prefix('admin')->group(function () {
+    Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');
+    Route::post('/login', [AdminLoginController::class, 'login'])->name('admin.login.submit');
+    Route::get('admin', [AdminLoginController::class, 'admin'])->name('admin.index')->middleware('auth');
+
+
+    Route::post('/logout', [AdminLoginController::class, 'logoutAdmin'])->name('admin.logout');
+});

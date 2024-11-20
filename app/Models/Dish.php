@@ -107,4 +107,33 @@ class Dish extends Model
         }
         return false;
     }
+
+
+
+    //QUẢN LÝ NGUYÊN LIỆU
+    // Quan hệ với nguyên liệu
+    public function ingredients()
+    {
+        return $this->belongsToMany(Ingredient::class, 'dishes_ingredients')
+            ->withPivot('quantity');
+    }
+
+
+    // Thêm nguyên liệu vào món ăn
+    public function addIngredient($ingredientId, $quantity)
+    {
+        return $this->ingredients()->attach($ingredientId, ['quantity' => $quantity]);
+    }
+
+    // Cập nhật nguyên liệu của món ăn
+    public function updateIngredient($ingredientId, $quantity)
+    {
+        return $this->ingredients()->updateExistingPivot($ingredientId, ['quantity' => $quantity]);
+    }
+
+    // Xóa nguyên liệu khỏi món ăn
+    public function removeIngredient($ingredientId)
+    {
+        return $this->ingredients()->detach($ingredientId);
+    }
 }

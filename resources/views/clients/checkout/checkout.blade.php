@@ -77,6 +77,20 @@
                                 <label for="note" class="form-label">Ghi chú</label>
                                 <textarea name="note" class="form-control" rows="3">{{ old('note') }}</textarea>
                             </div>
+                            <div class="mb-3">
+                                <label for="paymentOption" class="form-label">Hình thức thanh toán</label>
+                                <select name="payment_option" id="paymentOption" class="form-select" onchange="toggleAddressField(this.value)">
+                                    <option value="store">Dùng tại cửa hàng</option>
+                                    <option value="delivery">Giao hàng</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3" id="deliveryAddressField" style="display: none;">
+                                <label for="deliveryAddress" class="form-label">Địa chỉ giao hàng</label>
+                                <textarea name="delivery_address" id="deliveryAddress" class="form-control" rows="3" placeholder="Nhập địa chỉ của bạn"></textarea>
+                            </div>
+
+
                         </div>
                     </div>
 
@@ -100,7 +114,7 @@
                             <div class="mb-3">
                                 <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
                                 <select name="paymentMethod" class="form-select" required>
-                                    <option value="restaurant">Thanh toán tại nhà hàng</option>
+                                    <option value="restaurant">Thanh toán tiền mặt</option>
                                     <option value="vnpay">Thanh toán qua VNPay</option>
                                     <option value="momo">Thanh toán qua MoMo</option>
                                 </select>
@@ -113,4 +127,14 @@
         </form>
     </div>
 </div>
+<script>
+    function toggleAddressField(option) {
+        const addressField = document.getElementById('deliveryAddressField');
+        if (option === 'delivery') {
+            addressField.style.display = 'block';
+        } else {
+            addressField.style.display = 'none';
+        }
+    }
+</script>
 @endsection

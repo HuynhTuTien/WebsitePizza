@@ -23,7 +23,7 @@ class OrderSeeder extends Seeder
                 'promotion_id' => 1,
                 'name' => 'Order 1',
                 'note' => 'Note for order 1',
-                'status' => 'đang sử lý',
+                'status' => 'đang xử lý',
                 'order_date' => Carbon::now()->format('Y-m-d'),
                 'order_time' => Carbon::now()->format('H:i:s'),
                 'created_at' => Carbon::now(),
@@ -40,7 +40,8 @@ class OrderSeeder extends Seeder
                 'order_time' => Carbon::now()->format('H:i:s'),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ], [
+            ],
+            [
                 'user_id' => 3,
                 'table_id' => 3,
                 'promotion_id' => 3,
@@ -51,7 +52,8 @@ class OrderSeeder extends Seeder
                 'order_time' => Carbon::now()->format('H:i:s'),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ], [
+            ],
+            [
                 'user_id' => 3,
                 'table_id' => 3,
                 'promotion_id' => 3,
@@ -62,7 +64,8 @@ class OrderSeeder extends Seeder
                 'order_time' => Carbon::now()->format('H:i:s'),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ], [
+            ],
+            [
                 'user_id' => 4,
                 'table_id' => 4,
                 'promotion_id' => 1,
@@ -73,7 +76,8 @@ class OrderSeeder extends Seeder
                 'order_time' => Carbon::now()->format('H:i:s'),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ], [
+            ],
+            [
                 'user_id' => 5,
                 'table_id' => 5,
                 'promotion_id' => 2,
@@ -84,7 +88,8 @@ class OrderSeeder extends Seeder
                 'order_time' => Carbon::now()->format('H:i:s'),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ], [
+            ],
+            [
                 'user_id' => 6,
                 'table_id' => 6,
                 'promotion_id' => 3,

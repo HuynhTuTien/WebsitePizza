@@ -124,6 +124,10 @@
                                                                 <a class="dropdown-item"
                                                                     href="{{ route('dish.edit', $dish->slug) }}">Chỉnh
                                                                     sửa</a>
+
+                                                                <a class="dropdown-item" href="{{ route('dish.ingredients', $dish->slug) }}">
+                                                                    Quản lý nguyên liệu</a>
+
                                                                 <a class="dropdown-item" href="#"
                                                                     data-bs-toggle="modal"
                                                                     data-bs-target="#deleteModal{{ $dish->slug }}">Xóa</a>
