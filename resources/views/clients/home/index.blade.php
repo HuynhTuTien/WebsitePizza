@@ -79,17 +79,17 @@
                     margin-bottom-20
                   ">
                             <div class="about-gallery-1">
-                                <img src="{{ asset('assets/client/images/gallery/1.jpg') }}" alt="" />
+                                <img src="{{ asset('assets/client/images/gallery/26.png') }}" alt="" />
                             </div>
                         </div>
                         <div class="col-lg-8 col-md-8 col-sm-8 col-8 margin-bottom-20">
                             <div class="about-gallery-2">
-                                <img src="{{ asset('assets/client/images/gallery/2.jpg') }}" alt="" />
+                                <img src="{{ asset('assets/client/images/gallery/gm3.jpg') }}" alt="" />
                             </div>
                         </div>
                         <div class="col-lg-6 col-md-6 col-sm-6 col-6">
                             <div class="about-gallery-3">
-                                <img src="{{ asset('assets/client/images/gallery/3.jpg') }}" alt="" />
+                                <img src="{{ asset('assets/client/images/gallery/30.jpg') }}" alt="" />
                             </div>
                         </div>
                         <div class="
@@ -99,7 +99,7 @@
                   ">
                             <div class="about-gallery-4 text-center">
                                 <img class="mp" src="{{ asset('assets/client/images/icons/3.png') }}" alt="" />
-                                <div class="items counter">200</div>
+                                <div class="items counter">40</div>
                                 <p>Món Ăn</p>
                                 <span class="g-s-4"><img src="{{ asset('assets/client/images/shapes/10.png') }}"
                                         alt="" /></span>
@@ -131,9 +131,9 @@
                             <img src="{{ asset('assets/client/images/icons/2.png') }}" alt="" />
                         </div>
                         <div class="garlic-burger-content">
-                            <h5>Bữa Tiệc Gà Gán</h5>
-                            <p> Ăn uống thả ga với những miếng gà giòn rụm, nóng hổi, thấm đẫm hương vị đặc biệt, cho
-                                bạn trải nghiệm vị ngon khó cưỡng! </p>
+                            <h5>Bữa Tiệc Pizza Ngon Tuyệt</h5>
+                            <p>Thỏa sức thưởng thức những chiếc pizza nóng hổi, với đế giòn tan, phủ đầy phô mai và topping tươi ngon, mang đến cho bạn trải nghiệm ẩm thực khó quên!</p>
+
                         </div>
                     </div>
                 </div>
@@ -157,32 +157,55 @@
                     <ul class="nav" id="menuAreaTab" role="tablist">
                         @foreach ($categories as $key => $category)
                         <li class="nav-item" role="presentation">
-                            <div class="nav-link @if ($key == 0) active @endif" id="menu{{ $key + 1 }}-tab"
-                                data-bs-toggle="tab" data-bs-target="#menu{{ $key + 1 }}-tab-pane" role="tab"
+                            <div class="nav-link @if ($key == 0) active @endif"
+                                id="menu{{ $key + 1 }}-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#menu{{ $key + 1 }}-tab-pane"
+                                role="tab"
                                 aria-controls="menu{{ $key + 1 }}-tab-pane"
-                                aria-selected="{{ $key == 0 ? 'true' : 'false' }}">
+                                aria-selected="{{ $key == 0 ? 'true' : 'false' }}"
+                                style="display: inline-block; white-space: nowrap;"
+                            >
                                 <div class="single-menu-nav text-center">
                                     <!-- Hình ảnh menu -->
                                     <div class="menu-img mb-1">
-                                        <img src="{{ asset('storage/images/' . $category->image) }}" alt="{{ $category->name }}"
-                                            class="img-fluid rounded-circle" style="max-width: 100px; max-height: 100px; object-fit: cover;">
+                                        <img
+                                            src="{{ asset('storage/images/' . $category->image) }}"
+                                            alt="{{ $category->name }}"
+                                            class="img-fluid rounded-circle"
+                                            style="max-width: 100px; max-height: 100px; object-fit: cover;"
+                                        >
                                     </div>
 
                                     <!-- Tên menu -->
-                                    <h6 class="text-black font-weight-bold" style="width: 100%; white-space: nowrap; text-overflow: ellipsis;">
+                                    <h6
+                                        class="text-black font-weight-bold"
+                                        style="white-space: nowrap; overflow: visible;"
+                                    >
                                         {{ $category->name }}
                                     </h6>
 
                                     <!-- Đường viền trang trí -->
-                                    <span class="g-s-4"><img src="{{ asset('assets/client/images/shapes/10.png') }}" alt="" /></span>
-                                    <span class="g-s-5"><img src="{{ asset('assets/client/images/shapes/14.png') }}" alt="" /></span>
+                                    <span class="g-s-4">
+                                        <img
+                                            src="{{ asset('assets/client/images/shapes/10.png') }}"
+                                            alt=""
+                                            class="img-fluid"
+                                        />
+                                    </span>
+                                    <span class="g-s-5">
+                                        <img
+                                            src="{{ asset('assets/client/images/shapes/14.png') }}"
+                                            alt=""
+                                            class="img-fluid"
+                                        />
+                                    </span>
                                 </div>
                             </div>
                         </li>
-
-
                         @endforeach
                     </ul>
+
                 </div>
             </div>
         </div>
@@ -240,10 +263,10 @@
                 <div class="row">
                     <div class="col-lg-8 col-md-8">
                         <div class="gallery-img-1">
-                            <h3>Buzzed Burger</h3>
+                            <h3>Pizza cheese</h3>
                             <p>Sale off 50% chỉ trong tuần này</p>
                             <a href="{{ route('dishDetail', $dish->id) }}" class="btn">Đặt hàng ngay</a>
-                            <img src="{{ asset('assets/client/images/gallery/24.png') }}" alt="" />
+                            <img src="{{ asset('assets/client/images/gallery/32.png') }}" alt="" />
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-4">
@@ -266,12 +289,12 @@
                 <div class="row margin-top-30">
                     <div class="col-lg-4 col-md-4">
                         <div class="gallery-img-3">
-                            <h5>Super Combo Burger</h5>
+                            <h5>Super Combo Pizza</h5>
                             <a href="{{ route('dishDetail', $dish->id) }}">Đặt hàng ngay bây giờ</a>
-                            <img src="{{ asset('assets/client/images/gallery/23.png') }}" alt="" />
+                            <img src="{{ asset('assets/client/images/gallery/32.png') }}" alt="" />
                             <img src="{{ asset('assets/client/images/shapes/layer2.png') }}" alt="" class="s12" />
                             <img src="{{ asset('assets/client/images/shapes/113.png') }}" alt="" class="s13" />
-                            <span class="gprice-2">150k</span>
+
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-4">
@@ -292,9 +315,9 @@
                     </div>
                     <div class="col-lg-4 col-md-4">
                         <div class="gallery-img-3">
-                            <h5>Super Combo Burger</h5>
+                            <h5>Super Combo Pizza</h5>
                             <a href="{{ route('dishDetail', $dish->id) }}">Đặt hàng ngay bây giờ</a>
-                            <img src="{{ asset('assets/client/images/gallery/23.png') }}" alt="" />
+                            <img src="{{ asset('assets/client/images/gallery/32.png') }}" alt="" />
                             <img src="{{ asset('assets/client/images/shapes/layer2.png') }}" alt="" class="s12" />
                             <img src="{{ asset('assets/client/images/shapes/113.png') }}" alt="" class="s13" />
                             <span class="gprice-2">150k</span>
@@ -304,9 +327,9 @@
             </div>
             <div class="col-lg-3 col-md-12">
                 <div class="gallery-img-4">
-                    <h5>Super Combo Burger</h5>
+                    <h5>Super Combo Pizza</h5>
                     <a href="{{ route('dishDetail', $dish->id) }}" class="btn">Đặt hàng ngay bây giờ</a>
-                    <img src="{{ asset('assets/client/images/gallery/22.png') }}" alt="" />
+                    <img src="{{ asset('assets/client/images/gallery/33.png') }}" alt="" />
                     <img src="{{ asset('assets/client/images/shapes/leaves.png') }}" alt="" class="s14" />
                     <img src="{{ asset('assets/client/images/shapes/transparent2.png') }}" alt="" class="s15" />
                     <span class="gprice-4"><img src="{{ asset('assets/client/images/gallery/25.png') }}"
@@ -378,36 +401,7 @@
 </section>
 
 <!-- slider-gallery-img -->
-<div class="slider-gallery-img">
-    <div class="container-fluid">
-        <div class="slider-gallery-active">
-            <div class="single-gallery-img">
-                <img src="{{ asset('assets/client/images/gallery/gm1.jpg') }}" alt="" />
-                <a href="#"><span><i class="fas fa-image"></i></span></a>
-            </div>
-            <div class="single-gallery-img">
-                <img src="{{ asset('assets/client/images/gallery/gm2.jpg') }}" alt="" />
-                <a href="#"><span><i class="fas fa-image"></i></span></a>
-            </div>
-            <div class="single-gallery-img">
-                <img src="{{ asset('assets/client/images/gallery/gm3.jpg') }}" alt="" />
-                <a href="#"><span><i class="fas fa-image"></i></span></a>
-            </div>
-            <div class="single-gallery-img">
-                <img src="{{ asset('assets/client/images/gallery/gm4.jpg') }}" alt="" />
-                <a href="#"><span><i class="fas fa-image"></i></span></a>
-            </div>
-            <div class="single-gallery-img">
-                <img src="{{ asset('assets/client/images/gallery/gm5.jpg') }}" alt="" />
-                <a href="#"><span><i class="fas fa-image"></i></span></a>
-            </div>
-            <div class="single-gallery-img">
-                <img src="{{ asset('assets/client/images/gallery/gm6.jpg') }}" alt="" />
-                <a href="#"><span><i class="fas fa-image"></i></span></a>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <!-- delivery-area -->
 <section class="delivery-area padding-top-115 padding-bottom-90">
@@ -428,7 +422,7 @@
               fadeInLeft
             ">
                 <div class="delivery-left">
-                    <img src="{{ asset('assets/client/images/bg/delivery-img.png') }}" alt="" />
+                    <img src="{{ asset('assets/client/images/bg/1.png') }}" alt="" />
                 </div>
             </div>
             <div class="col-lg-6 col-md-12 wow fadeInRight">
@@ -461,7 +455,7 @@
     </div>
 </section>
 
-<!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
         // Get the current date and time
@@ -481,6 +475,6 @@
             offset: 0 // Adjust for your timezone if necessary
         });
     });
-</script> -->
+</script>
 
 @endsection

@@ -31,7 +31,7 @@
             <div class="col-lg-3 col-md-6">
                 <div class="single-food text-center">
                     <img src="{{ asset('assets/client/images/icons/3.png') }}" alt="">
-                    <span class="items counter">2000</span>
+                    <span class="items counter">40</span>
                     <p>món ăn</p>
                     <span class="g-s-4"><img src="{{ asset('assets/client/images/shapes/10.png') }}" alt=""></span>
                     <span class="g-s-5"><img src="{{ asset('assets/client/images/shapes/14.png') }}" alt=""></span>
@@ -39,9 +39,9 @@
             </div>
             <div class="col-lg-3 col-md-6">
                 <div class="single-food orange text-center">
-                    <img src="{{ asset('assets/client/images/icons/f-2.png') }}" alt="">
-                    <span class="items counter">500</span>
-                    <p> món ăn burger</p>
+                    <img src="{{ asset('assets/client/images/icons/pm5.png') }}" alt="">
+                    <span class="items counter">30</span>
+                    <p> món ăn pizza</p>
                     <span class="g-s-4"><img src="{{ asset('assets/client/images/shapes/10.png') }}" alt=""></span>
                     <span class="g-s-5"><img src="{{ asset('assets/client/images/shapes/14.png') }}" alt=""></span>
                 </div>
@@ -49,7 +49,7 @@
             <div class="col-lg-3 col-md-6">
                 <div class="single-food text-center">
                     <img src="{{ asset('assets/client/images/icons/f-3.png') }}" alt="">
-                    <span class="items counter">1000</span>
+                    <span class="items counter">10</span>
                     <p> mặt hàng nước giải khát</p>
                     <span class="g-s-4"><img src="{{ asset('assets/client/images/shapes/10.png') }}" alt=""></span>
                     <span class="g-s-5"><img src="{{ asset('assets/client/images/shapes/14.png') }}" alt=""></span>
@@ -58,7 +58,7 @@
             <div class="col-lg-3 col-md-6">
                 <div class="single-food orange text-center">
                     <img src="{{ asset('assets/client/images/icons/f-4.png') }}" alt="">
-                    <span class="items counter">600</span>
+                    <span class="items counter">20</span>
                     <p>Thức ăn nhanh ngon</p>
                     <span class="g-s-4"><img src="{{ asset('assets/client/images/shapes/10.png') }}" alt=""></span>
                     <span class="g-s-5"><img src="{{ asset('assets/client/images/shapes/14.png') }}" alt=""></span>
@@ -81,17 +81,17 @@
                         <div
                             class="col-lg-4 col-md-4 col-sm-4 col-4 d-flex align-items-end justify-content-end margin-bottom-20">
                             <div class="about-gallery-1">
-                                <img src="{{ asset('assets/client/images/gallery/1.jpg') }}" alt="">
+                                <img src="{{ asset('assets/client/images/gallery/26.png') }}" alt="">
                             </div>
                         </div>
                         <div class="col-lg-8 col-md-8 col-sm-8 col-8 margin-bottom-20">
                             <div class="about-gallery-2">
-                                <img src="{{ asset('assets/client/images/gallery/2.jpg') }}" alt="">
+                                <img src="{{ asset('assets/client/images/gallery/gm3.jpg') }}" alt="">
                             </div>
                         </div>
                         <div class="col-lg-6 col-md-6 col-sm-6 col-6">
                             <div class="about-gallery-3">
-                                <img src="{{ asset('assets/client/images/gallery/3.jpg') }}" alt="">
+                                <img src="{{ asset('assets/client/images/gallery/30.jpg') }}" alt="">
                             </div>
                         </div>
                         <div class="col-lg-5 col-md-5 col-sm-5 col-5 d-flex align-items-stretch ">
@@ -218,7 +218,7 @@
             </div>
             <div class="col-lg-6 d-none d-lg-block  wow fadeInRight">
                 <div class="delicious-right">
-                    <img src="{{ asset('assets/client/images/gallery/1.png') }}" alt="">
+                    <img src="{{ asset('assets/client/images/gallery/33.png') }}" alt="">
                 </div>
             </div>
         </div>

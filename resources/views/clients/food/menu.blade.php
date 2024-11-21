@@ -71,16 +71,15 @@
     <!-- chicken tab-area -->
     <section class="menu-area pizza-area burger-area chicken-area padding-top-40">
         <div class="menu-i-shapes">
-            <span class="bleft"><img src="{{ asset('assets/client/images/menu-item/bleft.png') }}" alt=""></span>
+            <span class="bleft"><img src="{{ asset('assets/client/images/menu-item/2r.png') }}" alt=""></span>
         </div>
         <div class="container">
             <div class="common-title-area text-center padding-40">
-                <h3>món ăn</h3>
-                <h2>thực đơn món ăn<span></span></h2>
+                <h3>Thực đơn pizza</h3>
             </div>
             <!-- menu-nav-wrapper -->
             <div class="menu-nav-wrapper">
-                <div class="container">
+                <div class="container  d-flex justify-content-center">
                     <div class="row">
                         @php
                             $isFirst = true;
@@ -126,47 +125,37 @@
                         role="tabpanel" aria-labelledby="food-{{ $category->id }}">
                         <div class="menu-items-wrapper pizza-items-wrapper margin-top-50">
                             <div class="row">
-                                <div class="col-lg-8">
+                                <div class="col-lg-12">
                                     <div class="row">
                                         @foreach ($category->dishes as $dish)
-                                            <div class="col-lg-6 col-md-6">
+                                            <div class="col-lg-6 col-md-6 mb-4">
                                                 <div class="row">
-                                                    <div class="col-lg-10 single-menu-item d-flex justify-content-between">
-                                                        <div class="menu-img">
+                                                    <div class="col-12 single-menu-item d-flex">
+                                                        <div class="menu-img" style="max-width: 120px; max-height: 120px; overflow: hidden; border-radius: 10px;">
                                                             <a href="{{ route('dishDetail', $dish->id) }}">
-                                                                <img src="{{ asset('storage/images/' . $dish->image) }}"
-                                                                alt="">
+                                                                <img
+                                                                    src="{{ asset('storage/images/' . $dish->image) }}"
+                                                                    alt="{{ $dish->name }}"
+                                                                    class="img-fluid"
+                                                                    style="width: 100%; height: 100%; object-fit: cover;">
                                                             </a>
-
                                                         </div>
-                                                        <div class="col-lg-12 menu-content">
-                                                            <h6><a href="{{ route('dishDetail', $dish->id) }}">{{ $dish->name }}</a></h6>
-
-                                                            <span>giá :{{ number_format($dish->price) }} VNĐ</span>
+                                                        <div class="menu-content ms-3" style="flex: 1; word-wrap: break-word; overflow-wrap: break-word;">
+                                                            <h6>
+                                                                <a href="{{ route('dishDetail', $dish->id) }}" style="white-space: normal;">
+                                                                    {{ $dish->name }}
+                                                                </a>
+                                                            </h6>
+                                                            <span>Giá: {{ number_format($dish->price) }} VNĐ</span>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         @endforeach
                                     </div>
+
                                 </div>
-                                <div class="col-lg-4">
-                                    <div class="chicken-tab-content">
-                                        <h5>Combo <br>Buzzed Burger</h5>
-                                        <p>Gà Chiên, Coca</p>
-                                        <a href="#">Đặt hàng ngay</a>
-                                        <span class='main-img'><img
-                                                src="{{ asset('assets/client/images/menu-item/chicken-banner.png') }}"
-                                                alt=""></span>
-                                        <span class="gprice-2">150k</span>
-                                        <span class="gshape1"><img
-                                                src="{{ asset('assets/client/images/shapes/38.png') }}"
-                                                alt=""></span>
-                                        <span class="gshape2"><img
-                                                src="{{ asset('assets/client/images/shapes/39.png') }}"
-                                                alt=""></span>
-                                    </div>
-                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -189,10 +178,11 @@
                     <div class="row">
                         <div class="col-lg-6 col-md-12 margin-bottom-30 wow fadeInLeft">
                             <div class="gallery-img-1">
-                                <h3 class="margin-bottom-10">Buzzed Burger</h3>
+                                <h3 class="margin-bottom-10">Pizza cheese
+                                </h3>
                                 <p>Sale off 50% chỉ trong tuần này</p>
                                 <a href="#" class="btn">order now</a>
-                                <img src="{{ asset('assets/client/images/gallery/24.png') }}" alt="">
+                                <img src="{{ asset('assets/client/images/gallery/32.png') }}" alt="">
                                 <span class="gs"><img src="{{ asset('assets/client/images/shapes/bbr.png') }}"
                                         alt=""></span>
 
@@ -200,11 +190,10 @@
                         </div>
                         <div class="col-lg-6 col-md-12 wow fadeInRight">
                             <div class="gallery-img-1 gallery-img-01">
-                                <h5 class="margin-bottom-10">Chicken Combo<br>
-                                    Burger</h5>
+                                <h5 class="margin-bottom-10">Super Combo Pizza</h5>
                                 <p>Sale off 50% chỉ trong tuần này</p>
                                 <a href="#" class="btn">order now</a>
-                                <img src="{{ asset('assets/client/images/menu-item/mg2.png') }}" alt="">
+                                <img src="{{ asset('assets/client/images/menu-item/pd5.png') }}" alt="">
                                 <span class="yellow"><img src="{{ asset('assets/client/images/shapes/37.png') }}"
                                         alt=""></span>
                                 <span class="gs1"><img src="{{ asset('assets/client/images/shapes/bbs.png') }}"
@@ -224,7 +213,7 @@
     <section class="testimonial padding-bottom-120 padding-top-80">
         <div class="container">
             <div class="testi-shapes">
-                <span class="ts-1"><img src="{{ asset('assets/client/images/img/31.png') }}" alt=""></span>
+
                 <span class="ts-2"><img src="{{ asset('assets/client/images/img/32.png') }}" alt=""></span>
                 <span class="ts-3"><img src="{{ asset('assets/client/images/shapes/7.png') }}" alt=""></span>
             </div>
@@ -254,7 +243,7 @@
                         </div>
 
                     </div>
-                    <p>Món ăn ở đây rất ngon, hương vị đúng chuẩn, ăn một lần là muốn quay lại nhiều lần!</p>
+                    <p>Món ăn ở đây rất ngon, hương vị đúng chuẩn, ăn một lần là muốn quay lại!</p>
                 </div>
                 <div class="single-testimonial">
                     <div class="testi-top">
